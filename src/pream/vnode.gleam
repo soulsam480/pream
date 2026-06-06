@@ -1,8 +1,8 @@
-import dom
-import format
 import gleam/list
 import gleam/option
-import signal
+import pream/dom
+import pream/format
+import pream/signal
 
 /// virtual dom node — same shape as the output
 /// of preact's `h()`. built up via small composable

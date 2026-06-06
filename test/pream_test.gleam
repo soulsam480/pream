@@ -1,8 +1,8 @@
 import gleam/option.{None, Some}
 import gleeunit
 import pream
-import signal
-import vnode
+import pream/signal
+import pream/vnode
 
 pub fn main() -> Nil {
   gleeunit.main()

@@ -1,6 +1,6 @@
 import gleam/option.{type Option}
-import signal
-import vnode.{type VNode}
+import pream/signal
+import pream/vnode.{type VNode}
 
 /// https://npmx.dev/package-docs/preact/v/10.29.2#class-ComponentChildren
 @external(javascript, "preact", "ComponentChildren")
@@ -10,7 +10,7 @@ pub type PreactComponent
 /// converts a vnode tree into a preact
 /// `ComponentChildren` value, ready to pass to
 /// preact's `render()`
-@external(javascript, "./component_ffi.mjs", "h")
+@external(javascript, "./pream/component_ffi.mjs", "h")
 pub fn to_preact(from node: VNode) -> PreactComponent
 
 /// unwraps a `Result`-returning render function.

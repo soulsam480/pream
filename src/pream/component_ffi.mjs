@@ -18,7 +18,7 @@ import {
 	VChild$ReactiveText$0,
 	VChild$Text$0,
 } from "./vnode.mjs";
-import { CustomType } from "./gleam.mjs";
+import { CustomType } from "../gleam.mjs";
 
 /**
  * @param {string} str

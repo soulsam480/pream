@@ -2,9 +2,9 @@ import { describe, it, expect } from "bun:test";
 import { render } from "preact";
 import { Window } from "happy-dom";
 import { toList } from "../../build/dev/javascript/pream/gleam.mjs";
-import * as vnode from "../../build/dev/javascript/pream/vnode.mjs";
+import * as vnode from "../../build/dev/javascript/pream/pream/vnode.mjs";
 import * as pream from "../../build/dev/javascript/pream/pream.mjs";
-import * as signal from "../../build/dev/javascript/pream/signal.mjs";
+import * as signal from "../../build/dev/javascript/pream/pream/signal.mjs";
 
 function setupDom() {
 	const window = new Window();
