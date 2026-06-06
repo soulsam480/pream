@@ -21,6 +21,7 @@ source_maps = true
 
 [dependencies]
 gleam_stdlib = ">= 1.0.0 and < 2.0.0"
+plinth = ">= 0.10.2 and < 1.0.0"
 
 [dev_dependencies]
 gleeunit = ">= 1.0.0 and < 2.0.0"

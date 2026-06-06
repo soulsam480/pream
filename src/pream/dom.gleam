@@ -1,9 +1,3 @@
-@external(javascript, "./dom_ffi.mjs", "THTMLElement")
-pub type HtmlElement
-
-/// base JS event
-pub type Event
-
 /// represents any JS Native value
 pub type Native
 

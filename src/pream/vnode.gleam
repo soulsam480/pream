@@ -1,5 +1,7 @@
+import gleam/dynamic/decode.{type Dynamic}
 import gleam/list
 import gleam/option
+import plinth/browser/event
 import pream/dom
 import pream/format
 import pream/signal
@@ -33,7 +35,7 @@ pub type Prop {
   /// it downstram in ffi. this is done to make
   /// the render API simple
   Attr(key: String, value: dom.Native)
-  Handler(event: String, handle: fn(dom.Event) -> Nil)
+  Handler(event: String, handle: fn(event.Event(Dynamic)) -> Nil)
 }
 
 // ── Construction ────────────────────────────────────────
@@ -57,7 +59,7 @@ pub fn fragment() -> VNode {
   VNode("$FRAGMENT", [], [])
 }
 
-// ── HTML shorthand constructors (all empty, pipe-friendly) ─
+// ── HTML shorthand constructors ─
 
 pub fn div() -> VNode {
   new("div")
@@ -191,7 +193,7 @@ pub fn hr() -> VNode {
   new("hr")
 }
 
-// ── Modifiers (pipeline-friendly) ───────────────────────
+// ── Modifiers ───────────────────────
 
 /// sets an attribute on the vnode. any gleam value
 /// is accepted — stringification/serialization is
@@ -206,7 +208,11 @@ pub fn prop(vnode: VNode, key: String, value: a) -> VNode {
 /// attaches an event handler. the event name is
 /// camelCased and prefixed with `on_` in ffi
 /// (e.g. `click` becomes `onClick`)
-pub fn on(vnode: VNode, event: String, handle: fn(dom.Event) -> Nil) -> VNode {
+pub fn on(
+  vnode: VNode,
+  event: String,
+  handle: fn(event.Event(Dynamic)) -> Nil,
+) -> VNode {
   VNode(..vnode, props: list.append(vnode.props, [Handler(event:, handle:)]))
 }
 
