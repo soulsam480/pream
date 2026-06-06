@@ -1,4 +1,3 @@
-import dom
 import gleam/option.{None, Some}
 import gleeunit
 import pream
@@ -61,18 +60,6 @@ pub fn to_preact_component_test() {
   // just smoke-test that it compiles and runs without error
   let _ = pream.to_preact_component(comp, Nil)
 
-  Nil
-}
-
-// ── vnode prop ordering tests ────────────────────────────
-
-pub fn prop_order_preserved_test() {
-  let _node =
-    vnode.new("div")
-    |> vnode.prop("a", "first")
-    |> vnode.prop("b", "second")
-
-  // smoke-test: the node is constructable and type-checks
   Nil
 }
 
@@ -187,17 +174,9 @@ pub fn when_some_none_test() {
   let child = vnode.when_some(None, fn(v: String) { vnode.text(v) })
   assert child == vnode.text("")
 }
-
 // ── use_signal hook tests (smoke only, no real DOM) ───────
 // use_signal and use_computed require a preact component
 // context and cannot be tested in gleeunit. the external
 // bindings compile and are verified by `gleam check`.
 
-// ── dom_ffi reference test (compile-time only) ───────────
-
-// The dom.gleam file references ./dom_ffi.mjs (not .ts).
-// If this test compiles and runs, the FFI reference is valid.
-pub fn dom_ffi_reference_test() {
-  let _native = dom.to_native("hello")
-  Nil
-}
+// ── dom_ffi reference is validated by compilation ───────

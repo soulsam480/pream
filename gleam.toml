@@ -1,21 +1,23 @@
 name = "pream"
 version = "1.0.0"
+description = "Ergonomic Gleam bindings for Preact with @preact/signals integration for fine-grained reactivity, shorthand HTML constructors, and Result/Option-aware rendering."
+licences = ["MIT"]
 target = "javascript"
 
-[javascript]
-typescript_declarations=true
-source_maps=true
+gleam = ">= 1.14.0"
 
-# Fill out these fields if you intend to generate HTML documentation or publish
-# your project to the Hex package manager.
-#
-# description = ""
-# licences = ["Apache-2.0"]
-# repository = { type = "github", user = "", repo = "" }
-# links = [{ title = "Website", href = "" }]
-#
-# For a full reference of all the available options, you can have a look at
-# https://gleam.run/writing-gleam/gleam-toml/.
+[repository]
+type = "github"
+user = "soulsam480"
+repo = "pream"
+
+links = [
+  { title = "GitHub", href = "https://github.com/soulsam480/pream" },
+]
+
+[javascript]
+typescript_declarations = true
+source_maps = true
 
 [dependencies]
 gleam_stdlib = ">= 1.0.0 and < 2.0.0"
