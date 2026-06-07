@@ -1,6 +1,6 @@
 name = "pream"
-version = "1.0.0"
-description = "Ergonomic Gleam bindings for Preact with @preact/signals integration for fine-grained reactivity, shorthand HTML constructors, and Result/Option-aware rendering."
+version = "1.2.0"
+description = "Signals-first Gleam bindings for Preact with @preact/signals integration, shorthand HTML constructors, and Result/Option-aware rendering."
 licences = ["MIT"]
 target = "javascript"
 

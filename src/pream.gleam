@@ -1,5 +1,4 @@
 import gleam/option.{type Option}
-import pream/signal
 import pream/vnode.{type VNode}
 
 /// https://npmx.dev/package-docs/preact/v/10.29.2#class-ComponentChildren
@@ -62,23 +61,16 @@ pub fn to_preact_component(comp: Component(p), props: p) -> PreactComponent {
   comp.render(props) |> to_preact
 }
 
-// ── Signal hooks (from @preact/signals) ─────────────────
+/// Wraps a `Component` so it only re-renders when its props
+/// change (shallow equality). In a signals-first app, this
+/// skips the VNode build when a parent re-renders but props
+/// haven't changed.
+@external(javascript, "./pream/component_ffi.mjs", "memo")
+pub fn memo(comp: Component(p)) -> Component(p)
 
-/// https://npmx.dev/package-docs/@preact%2Fsignals/v/2.9.1#function-useSignal
-/// creates a reactive signal scoped to a component.
-/// returns the same `Signal` type as `signal.new`,
-/// composable with `signal.value`, `signal.set`,
-/// `signal.map`, etc.
-@external(javascript, "@preact/signals", "useSignal")
-pub fn use_signal(initial: a) -> signal.Signal(a)
-
-/// https://npmx.dev/package-docs/@preact%2Fsignals/v/2.9.1#function-useSignalEffect
-/// runs a reactive effect scoped to a component
-@external(javascript, "@preact/signals", "useSignalEffect")
-pub fn use_signal_effect(run: fn() -> Nil) -> Nil
-
-/// https://npmx.dev/package-docs/@preact%2Fsignals/v/2.9.1#function-useComputed
-/// returns a read-only computed signal scoped to
-/// a component — same semantics as `signal.computed`
-@external(javascript, "@preact/signals", "useComputed")
-pub fn use_computed(compute: fn() -> a) -> signal.Signal(a)
+/// Like `memo` but with a custom comparison function for props.
+@external(javascript, "./pream/component_ffi.mjs", "memo_custom")
+pub fn memo_custom(
+  comp: Component(p),
+  compare: fn(p, p) -> Bool,
+) -> Component(p)

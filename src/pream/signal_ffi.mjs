@@ -1,4 +1,4 @@
-import { signal } from "@preact/signals";
+import { signal } from '@preact/signals';
 
 /**
  * @template T
@@ -6,7 +6,7 @@ import { signal } from "@preact/signals";
  * @returns T
  */
 export function signal_value(signal) {
-	return signal.value;
+  return signal.value;
 }
 
 /**
@@ -15,7 +15,7 @@ export function signal_value(signal) {
  * @returns T
  */
 export function signal_peek(signal) {
-	return signal.peek();
+  return signal.peek();
 }
 
 /**
@@ -24,8 +24,8 @@ export function signal_peek(signal) {
  * @param {import('@preact/signals').Signal<T>} value
  */
 export function signal_set(signal, value) {
-	signal.value = value;
-	return signal;
+  signal.value = value;
+  return signal;
 }
 
 /**
@@ -35,25 +35,25 @@ export function signal_set(signal, value) {
  * @returns {import('@preact/signals').Signal<T>}
  */
 export function persisted(name, initial) {
-	const key = `signal_${name}`;
+  const key = `signal_${name}`;
 
-	let from_local = initial;
+  let from_local = initial;
 
-	try {
-		const stored = localStorage.getItem(key);
+  try {
+    const stored = localStorage.getItem(key);
 
-		if (stored !== null) {
-			from_local = JSON.parse(stored) ?? initial;
-		}
-	} catch {
-		from_local = initial;
-	}
+    if (stored !== null) {
+      from_local = JSON.parse(stored) ?? initial;
+    }
+  } catch {
+    from_local = initial;
+  }
 
-	const sig = signal(from_local);
+  const sig = signal(from_local);
 
-	sig.subscribe((state) => {
-		localStorage.setItem(key, JSON.stringify(state));
-	});
+  sig.subscribe((state) => {
+    localStorage.setItem(key, JSON.stringify(state));
+  });
 
-	return sig;
+  return sig;
 }
