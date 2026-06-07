@@ -105,6 +105,9 @@ pub type Ref(a) {
 @external(javascript, "./hooks_ffi.mjs", "use_ref")
 pub fn use_ref(initial: a) -> Ref(a)
 
+@external(javascript, "./hooks_ffi.mjs", "set_ref")
+pub fn set_ref(ref: Ref(a), to: a) -> Ref(a)
+
 /// Customizes the instance value exposed through a ref.
 /// Typically used with `forwardRef` in component libraries.
 @external(javascript, "./hooks_ffi.mjs", "use_imperative_handle")
