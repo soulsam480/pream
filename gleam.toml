@@ -1,5 +1,5 @@
 name = "pream"
-version = "1.2.0"
+version = "1.3.0"
 description = "Signals-first Gleam bindings for Preact with @preact/signals integration, shorthand HTML constructors, and Result/Option-aware rendering."
 licences = ["MIT"]
 target = "javascript"
