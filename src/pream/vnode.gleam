@@ -23,6 +23,7 @@ pub type VChild {
   Text(String)
   Reactive(signal.Signal(VNode))
   ReactiveText(signal.Signal(String))
+  ComponentNode(component: dom.Native, props: dom.Native)
 }
 
 /// vnode property — either an attribute (any gleam

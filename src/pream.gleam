@@ -1,5 +1,6 @@
 import gleam/option.{type Option}
-import pream/vnode.{type VNode}
+import pream/dom
+import pream/vnode.{type VNode, type VChild}
 
 /// https://npmx.dev/package-docs/preact/v/10.29.2#class-ComponentChildren
 @external(javascript, "preact", "ComponentChildren")
@@ -55,11 +56,13 @@ pub fn render_component(comp: Component(p), props: p) -> VNode {
   comp.render(props)
 }
 
-/// render a component and convert directly to a
-/// preact component, ready for `render()`
-pub fn to_preact_component(comp: Component(p), props: p) -> PreactComponent {
-  comp.render(props) |> to_preact
-}
+/// render a component as a lazy Preact function
+/// component boundary, ready for `render()`. unlike
+/// the eager path (comp.render(props) |> to_preact),
+/// this preserves the component boundary so devtools
+/// and signal-driven re-rendering work correctly
+@external(javascript, "./pream/component_ffi.mjs", "to_preact_lazy")
+pub fn to_preact_component(comp: Component(p), props: p) -> PreactComponent
 
 /// Wraps a `Component` so it only re-renders when its props
 /// change (shallow equality). In a signals-first app, this
@@ -74,3 +77,12 @@ pub fn memo_custom(
   comp: Component(p),
   compare: fn(p, p) -> Bool,
 ) -> Component(p)
+
+/// creates a lazy component child that preserves the
+/// Preact component boundary. use this instead of
+/// `element(comp.render(props))` when composing components
+/// so that Preact devtools and signal-driven re-rendering
+/// work correctly
+pub fn component_child(comp: Component(p), with props: p) -> VChild {
+  vnode.ComponentNode(component: dom.to_native(comp), props: dom.to_native(props))
+}
