@@ -2,8 +2,6 @@ import { describe, it, expect } from 'bun:test';
 import { render, h } from 'preact';
 import { Window } from 'happy-dom';
 import * as hooks from '../../build/dev/javascript/pream/pream/hooks.mjs';
-import * as pream from '../../build/dev/javascript/pream/pream.mjs';
-import * as vnode from '../../build/dev/javascript/pream/pream/vnode.mjs';
 
 function setupDom() {
   const window = new Window();
@@ -120,24 +118,6 @@ describe('use_id', () => {
     render(h(App), body);
     expect(typeof id1).toBe('string');
     expect(id1).not.toBe(id2);
-  });
-});
-
-describe('memo', () => {
-  it('wraps a component with memo', () => {
-    const { body } = setupDom();
-
-    // Component that returns a Gleam VNode
-    const comp = pream.component((props) => {
-      return vnode.child(vnode.new$('div'), vnode.text(props.name));
-    });
-
-    const MemoComp = pream.memo(comp);
-    const node = pream.render_component(MemoComp, { name: 'test' });
-    const preactNode = pream.to_preact(node);
-
-    render(preactNode, body);
-    expect(body.innerHTML).toBe('<div>test</div>');
   });
 });
 

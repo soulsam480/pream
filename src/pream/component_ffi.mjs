@@ -9,10 +9,9 @@ import {
   Prop$Handler$handle,
   Prop$isAttr,
   Prop$isHandler,
-  VChild$ComponentNode$0,
-  VChild$ComponentNode$1,
+  VChild$Boundary$0,
   VChild$Element$0,
-  VChild$isComponentNode,
+  VChild$isBoundary,
   VChild$isElement,
   VChild$isReactive,
   VChild$isReactiveText,
@@ -21,21 +20,12 @@ import {
   VChild$ReactiveText$0,
   VChild$Text$0,
 } from './vnode.mjs';
-import { Component } from '../pream.mjs';
 import { CustomType } from '../gleam.mjs';
 
-const componentCache = new WeakMap();
-
-function getOrCreatePreactComponent(comp) {
-  let fn = componentCache.get(comp);
-  if (!fn) {
-    fn = function GleamComponent(props) {
-      return h(comp.render(props));
-    };
-    fn.displayName = 'GleamComponent';
-    componentCache.set(comp, fn);
-  }
-  return fn;
+function boundaryComponent(render) {
+  return function BoundaryComponent() {
+    return h(render());
+  };
 }
 
 /**
@@ -131,58 +121,13 @@ function serialize_children(children) {
         return computed(() => VChild$ReactiveText$0(child).value);
       }
 
-      if (VChild$isComponentNode(child)) {
-        const comp = VChild$ComponentNode$0(child);
-        const props = VChild$ComponentNode$1(child);
-        const preactComp = getOrCreatePreactComponent(comp);
-        return preact_h(preactComp, props);
+      if (VChild$isBoundary(child)) {
+        const render = VChild$Boundary$0(child);
+        const preactComp = boundaryComponent(render);
+        return preact_h(preactComp, {});
       }
 
       return null;
     })
     .filter(Boolean);
-}
-
-function shallowEqual(a, b) {
-  if (a === b) return true;
-  const keysA = Object.keys(a);
-  const keysB = Object.keys(b);
-  if (keysA.length !== keysB.length) return false;
-  for (const key of keysA) {
-    if (a[key] !== b[key]) return false;
-  }
-  return true;
-}
-
-export function memo(component) {
-  let lastProps;
-  let lastResult;
-
-  return new Component(function (props) {
-    if (lastProps !== undefined && shallowEqual(lastProps, props)) {
-      return lastResult;
-    }
-    lastProps = props;
-    lastResult = component.render(props);
-    return lastResult;
-  });
-}
-
-export function memo_custom(component, compare) {
-  let lastProps;
-  let lastResult;
-
-  return new Component(function (props) {
-    if (lastProps !== undefined && compare(lastProps, props)) {
-      return lastResult;
-    }
-    lastProps = props;
-    lastResult = component.render(props);
-    return lastResult;
-  });
-}
-
-export function to_preact_lazy(comp, props) {
-  const preactComp = getOrCreatePreactComponent(comp);
-  return preact_h(preactComp, props);
 }

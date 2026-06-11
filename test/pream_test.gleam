@@ -40,29 +40,6 @@ pub fn unwrap_option_none_test() {
   assert result == vnode.empty()
 }
 
-// ── Component tests ──────────────────────────────────────
-
-pub fn component_roundtrip_test() {
-  let comp =
-    pream.component(fn(name: String) {
-      vnode.new("div") |> vnode.child(vnode.text(name))
-    })
-
-  let result = pream.render_component(comp, "hello")
-  let expected = vnode.new("div") |> vnode.child(vnode.text("hello"))
-
-  assert result == expected
-}
-
-pub fn to_preact_component_test() {
-  let comp = pream.component(fn(_p: Nil) { vnode.empty() })
-
-  // just smoke-test that it compiles and runs without error
-  let _ = pream.to_preact_component(comp, Nil)
-
-  Nil
-}
-
 // ── Shorthand constructor tests ─────────────────────────
 
 pub fn div_shortcut_test() {
@@ -143,6 +120,14 @@ pub fn text_with_returns_vchild_test() {
   assert child == vnode.text("Hello, world!")
 }
 
+// ── Component boundary tests ──────────────────────────────
+
+pub fn component_creates_boundary_test() {
+  let boundary = vnode.component(fn() { vnode.new("div") })
+  let assert vnode.Boundary(render: _) = boundary
+  Nil
+}
+
 // ── Conditional VChild constructor tests ────────────────
 
 pub fn when_true_test() {
@@ -174,6 +159,7 @@ pub fn when_some_none_test() {
   let child = vnode.when_some(None, fn(v: String) { vnode.text(v) })
   assert child == vnode.text("")
 }
+
 // ── use_signal hook tests (smoke only, no real DOM) ───────
 // use_signal and use_computed require a preact component
 // context and cannot be tested in gleeunit. the external

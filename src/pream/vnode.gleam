@@ -13,17 +13,18 @@ pub opaque type VNode {
   VNode(tag: String, props: List(Prop), children: List(VChild))
 }
 
-/// child of a vnode — one of four variants:
+/// child of a vnode — one of five variants:
 /// static element, static text, reactive element,
-/// or reactive text. use the constructors below
-/// (e.g. `text`, `element`, `reactive`, `reactive_text`)
+/// reactive text, or component boundary. use the
+/// constructors below (e.g. `text`, `element`,
+/// `reactive`, `reactive_text`, `component`)
 /// to build values of this type.
 pub type VChild {
   Element(VNode)
   Text(String)
   Reactive(signal.Signal(VNode))
   ReactiveText(signal.Signal(String))
-  ComponentNode(component: dom.Native, props: dom.Native)
+  Boundary(render: dom.Native)
 }
 
 /// vnode property — either an attribute (any gleam
@@ -364,6 +365,20 @@ pub fn reactive(s: signal.Signal(VNode)) -> VChild {
 /// creates a reactive text child from a signal
 pub fn reactive_text(s: signal.Signal(String)) -> VChild {
   ReactiveText(s)
+}
+
+/// Creates a Preact component boundary from a render
+/// function. Use this when composing components so that
+/// Preact devtools and signal-driven re-rendering work
+/// correctly.
+///
+/// Named zero-arg functions can be passed directly:
+///   vnode.component(counter)
+///
+/// Functions with arguments need a wrapping closure:
+///   vnode.component(fn() { inner(count) })
+pub fn component(render: fn() -> VNode) -> VChild {
+  Boundary(render: dom.to_native(render))
 }
 
 // ── Conditional VChild constructors ────────────────────

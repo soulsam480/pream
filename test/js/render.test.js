@@ -69,13 +69,13 @@ describe('vnode rendering', () => {
 });
 
 describe('component boundaries', () => {
-  it('renders a component child as a Preact function component', () => {
+  it('renders a component boundary with a named function', () => {
     const { body } = setupDom();
 
-    const comp = new pream.Component((props) =>
-      vnode.child(vnode.new$('span'), vnode.text('inner')),
-    );
-    const child = pream.component_child(comp, {});
+    function counter() {
+      return vnode.child(vnode.new$('span'), vnode.text('inner'));
+    }
+    const child = vnode.component(counter);
 
     const rootNode = vnode.child(vnode.new$('main'), child);
     const preactNode = pream.to_preact(rootNode);
@@ -84,37 +84,46 @@ describe('component boundaries', () => {
     expect(body.innerHTML).toBe('<main><span>inner</span></main>');
   });
 
-  it('renders nested component children preserving boundaries', () => {
+  it('renders a component boundary with an inline closure', () => {
     const { body } = setupDom();
 
-    const leafComp = new pream.Component((props) =>
-      vnode.child(vnode.new$('span'), vnode.text(props.name)),
-    );
-    const innerComp = new pream.Component(() =>
-      vnode.children(
-        vnode.new$('div'),
-        toList([
-          pream.component_child(leafComp, { name: 'leaf' }),
-          vnode.text('world'),
-        ]),
-      ),
-    );
-    const rootComp = new pream.Component(() =>
-      vnode.child(vnode.new$('main'), pream.component_child(innerComp, {})),
+    const child = vnode.component(() =>
+      vnode.child(vnode.new$('span'), vnode.text('inner')),
     );
 
-    const preactNode = pream.to_preact_component(rootComp, {});
+    const rootNode = vnode.child(vnode.new$('main'), child);
+    const preactNode = pream.to_preact(rootNode);
+    render(preactNode, body);
+
+    expect(body.innerHTML).toBe('<main><span>inner</span></main>');
+  });
+
+  it('renders nested component boundaries', () => {
+    const { body } = setupDom();
+
+    const leaf = (name) =>
+      vnode.child(vnode.new$('span'), vnode.text(name));
+    const inner = () =>
+      vnode.children(vnode.new$('div'), toList([
+        vnode.component(() => leaf('leaf')),
+        vnode.text('world'),
+      ]));
+
+    const rootNode = vnode.child(
+      vnode.new$('main'),
+      vnode.component(inner),
+    );
+    const preactNode = pream.to_preact(rootNode);
     render(preactNode, body);
 
     expect(body.innerHTML).toBe('<main><div><span>leaf</span>world</div></main>');
   });
 
-  it('to_preact_component returns a Preact VNode with function type', () => {
-    const comp = new pream.Component(() =>
+  it('component boundary creates a Boundary VChild', () => {
+    const child = vnode.component(() =>
       vnode.child(vnode.new$('div'), vnode.text('hello')),
     );
-    const preactNode = pream.to_preact_component(comp, {});
 
-    expect(typeof preactNode.type).toBe('function');
+    expect(vnode.VChild$isBoundary(child)).toBe(true);
   });
 });

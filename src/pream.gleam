@@ -1,6 +1,5 @@
 import gleam/option.{type Option}
-import pream/dom
-import pream/vnode.{type VNode, type VChild}
+import pream/vnode.{type VNode}
 
 /// https://npmx.dev/package-docs/preact/v/10.29.2#class-ComponentChildren
 @external(javascript, "preact", "ComponentChildren")
@@ -37,52 +36,4 @@ pub fn unwrap_option(
     option.Some(node) -> node
     option.None -> vnode.empty()
   }
-}
-
-/// typed component record — wraps a props-to-vnode
-/// render function so it can be named, composed,
-/// and passed around explicitly
-pub type Component(p) {
-  Component(render: fn(p) -> VNode)
-}
-
-/// construct a component from a render function
-pub fn component(render: fn(p) -> VNode) -> Component(p) {
-  Component(render:)
-}
-
-/// render a component with the given props
-pub fn render_component(comp: Component(p), props: p) -> VNode {
-  comp.render(props)
-}
-
-/// render a component as a lazy Preact function
-/// component boundary, ready for `render()`. unlike
-/// the eager path (comp.render(props) |> to_preact),
-/// this preserves the component boundary so devtools
-/// and signal-driven re-rendering work correctly
-@external(javascript, "./pream/component_ffi.mjs", "to_preact_lazy")
-pub fn to_preact_component(comp: Component(p), props: p) -> PreactComponent
-
-/// Wraps a `Component` so it only re-renders when its props
-/// change (shallow equality). In a signals-first app, this
-/// skips the VNode build when a parent re-renders but props
-/// haven't changed.
-@external(javascript, "./pream/component_ffi.mjs", "memo")
-pub fn memo(comp: Component(p)) -> Component(p)
-
-/// Like `memo` but with a custom comparison function for props.
-@external(javascript, "./pream/component_ffi.mjs", "memo_custom")
-pub fn memo_custom(
-  comp: Component(p),
-  compare: fn(p, p) -> Bool,
-) -> Component(p)
-
-/// creates a lazy component child that preserves the
-/// Preact component boundary. use this instead of
-/// `element(comp.render(props))` when composing components
-/// so that Preact devtools and signal-driven re-rendering
-/// work correctly
-pub fn component_child(comp: Component(p), with props: p) -> VChild {
-  vnode.ComponentNode(component: dom.to_native(comp), props: dom.to_native(props))
 }

@@ -1,0 +1,22 @@
+{
+  "name": "example",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "vite dev"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "ts-gleam": "^1.1.0",
+    "vite": "^8.0.16",
+    "vite-gleam": "^1.7.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@preact/signals": "^2.9.1",
+    "preact": "^10.29.2"
+  }
+}
