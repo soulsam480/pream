@@ -15,7 +15,7 @@ signals and re-render when signals change. This means:
 
 - No `useState` / `useReducer` — use `signal.new` and `signal.set` instead
 - No manual dependency arrays for signal effects — use `use_signal_effect`
-- `memo` skips VNode building when props haven't changed across re-renders
+- Component boundaries preserve Preact devtools and signal-driven re-rendering
 
 ## Install
 
@@ -33,7 +33,6 @@ npm install preact @preact/signals
 
 ```gleam
 import pream
-import pream/hooks
 import pream/signal
 import pream/vnode
 
@@ -44,15 +43,75 @@ pub fn main() {
     vnode.div()
     |> vnode.children([
       vnode.text("Clicked "),
-      vnode.reactive_text(signal.map(count, fn(n) { "clicked " <> n })),
+      vnode.reactive_text(signal.map(count, fn(n) { int.to_string(n) })),
       vnode.text(" times"),
-      vnode.button()
-      |> vnode.on("click", fn(_) { signal.set(count, signal.value(count) + 1) })
-      |> vnode.child(vnode.text("Increment")),
+      vnode.element(
+        vnode.button()
+        |> vnode.on("click", fn(_) { signal.setter(count, fn(c) { c + 1 }) })
+        |> vnode.child(vnode.text("Increment")),
+      ),
     ])
 
   pream.to_preact(app)
 }
+```
+
+## Component boundaries
+
+Use `vnode.component` to create a Preact component boundary. This preserves
+Preact devtools visibility and ensures signal-driven re-rendering is scoped
+to the component. Static values are passed via closure capture; dynamic
+values flow through signals.
+
+```gleam
+import pream
+import pream/hooks
+import pream/signal
+import pream/vnode
+
+fn counter() -> vnode.VNode {
+  let count = hooks.use_signal(0)
+  vnode.new("div")
+  |> vnode.child(vnode.reactive_text(signal.map(count, int.to_string)))
+  |> vnode.child(vnode.element(
+    vnode.button()
+    |> vnode.on("click", fn(_) { signal.setter(count, fn(c) { c + 1 }); Nil })
+    |> vnode.child(vnode.text("+1")),
+  ))
+}
+
+pub fn main() -> pream.PreactComponent {
+  vnode.new("main")
+  |> vnode.child(vnode.text("Counter Demo"))
+  |> vnode.child(vnode.component(counter))
+  |> pream.to_preact()
+}
+```
+
+Functions with arguments need a wrapping closure to capture state:
+
+```gleam
+fn greeting(name: String) -> vnode.VNode {
+  vnode.new("div")
+  |> vnode.child(vnode.text("Hello, " <> name))
+}
+
+// In another component:
+vnode.new("main")
+|> vnode.child(vnode.component(fn() { greeting("Alice") }))
+```
+
+Dynamic values use signals instead of changing props:
+
+```gleam
+fn counter_display(count: signal.Signal(Int)) -> vnode.VNode {
+  vnode.new("span")
+  |> vnode.child(vnode.reactive_text(signal.map(count, int.to_string)))
+}
+
+// In another component:
+vnode.new("main")
+|> vnode.child(vnode.component(fn() { counter_display(some_signal) }))
 ```
 
 ## Examples
@@ -60,7 +119,6 @@ pub fn main() {
 ### Counter with signal
 
 ```gleam
-import pream
 import pream/signal
 import pream/vnode
 
@@ -71,13 +129,14 @@ pub fn counter() {
   |> vnode.child(vnode.reactive_text(signal.map(count, fn(n) {
     "Count: " <> int.to_string(n)
   })))
-  |> vnode.child(
+  |> vnode.child(vnode.element(
     vnode.button()
     |> vnode.on("click", fn(_) {
-      signal.set(count, signal.value(count) + 1)
+      signal.setter(count, fn(c) { c + 1 })
+      Nil
     })
     |> vnode.child(vnode.text("Increment")),
-  )
+  ))
 }
 ```
 
@@ -94,37 +153,14 @@ pub fn visibility_toggle() {
   |> vnode.child(vnode.when_signal(visible, fn() {
     vnode.text("Hello, world!")
   }))
-  |> vnode.child(
+  |> vnode.child(vnode.element(
     vnode.button()
     |> vnode.on("click", fn(_) {
-      signal.set(visible, !signal.value(visible))
+      signal.setter(visible, fn(v) { !v })
+      Nil
     })
     |> vnode.child(vnode.text("Toggle")),
-  )
-}
-```
-
-### Memoized component
-
-```gleam
-import pream
-import pream/hooks
-import pream/vnode
-
-pub fn expensive_list() {
-  let comp = pream.component(fn(items: List(String)) {
-    vnode.ul()
-    |> vnode.children(
-      list.map(items, fn(item) {
-        vnode.element(
-          vnode.li() |> vnode.child(vnode.text(item))
-        )
-      }),
-    )
-  })
-
-  // Only re-renders when `items` prop changes
-  hooks.memo(comp)
+  ))
 }
 ```
 
@@ -142,13 +178,15 @@ pub fn timer_component() {
     fn() { clearInterval(id) }
   }, [])
 
-  vnode.div() |> vnode.child(vnode.text("Timer running"))
+  vnode.new("div") |> vnode.child(vnode.text("Timer running"))
 }
 ```
 
 ## Features
 
 - **Signals-first** — re-rendering driven by signals, not component state
+- **Component boundaries** — `vnode.component` preserves Preact devtools and
+  signal-driven re-rendering
 - **Shorthand constructors** — `vnode.div()`, `vnode.span()`, `vnode.button()`,
   etc.
 - **Pipe-friendly modifiers** — `prop`, `on`, `class`, `id`, `disabled`, ...
@@ -156,8 +194,6 @@ pub fn timer_component() {
 - **Component hooks** — `use_signal`, `use_signal_effect`, `use_computed`
 - **Preact hooks** — `use_effect`, `use_memo`, `use_callback`, `use_ref`,
   `use_id`, ...
-- **Component memo** — `memo`, `memo_custom` for skipping unnecessary VNode
-  builds
 - **QoL hooks** — `use_mount`, `use_unmount`
 - **Conditional helpers** — `vnode.when`, `vnode.unless`, `vnode.when_some`,
   `vnode.when_signal`, `vnode.map_signal`
@@ -205,13 +241,6 @@ All hooks are available from `import pream/hooks`.
 | ------------------------ | -------------------------------------- |
 | `use_id()`               | Unique ID for accessibility attributes |
 | `use_debug_value(value)` | Custom devtools label                  |
-
-### Component memo
-
-| Hook                         | Description                                    |
-| ---------------------------- | ---------------------------------------------- |
-| `memo(comp)`                 | Wrap a component with shallow props comparison |
-| `memo_custom(comp, compare)` | Wrap with custom comparison function           |
 
 ### QoL hooks
 
